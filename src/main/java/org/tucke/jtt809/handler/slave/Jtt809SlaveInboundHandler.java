@@ -30,6 +30,7 @@ public class Jtt809SlaveInboundHandler extends SimpleChannelInboundHandler<Outer
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        Jtt809Client.add(gnsscenterId, ctx.channel());
         if (activePacket != null) {
             ctx.writeAndFlush(activePacket);
         }
@@ -38,13 +39,13 @@ public class Jtt809SlaveInboundHandler extends SimpleChannelInboundHandler<Outer
 
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
-        Jtt809Client.removeClient(ctx, gnsscenterId);
+        Jtt809Client.close(gnsscenterId);
         super.channelUnregistered(ctx);
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        Jtt809Client.removeClient(ctx, gnsscenterId);
+        Jtt809Client.close(gnsscenterId);
         super.exceptionCaught(ctx, cause);
     }
 
@@ -53,6 +54,7 @@ public class Jtt809SlaveInboundHandler extends SimpleChannelInboundHandler<Outer
         if (evt instanceof IdleStateEvent) {
             IdleStateEvent event = (IdleStateEvent) evt;
             if (event.state() == IdleState.WRITER_IDLE) {
+                // 从链路连接保持请求
                 OuterPacket packet = new OuterPacket();
                 packet.setId(Jtt809Constant.DataType.DOWN_LINKTEST_REQ);
                 ctx.writeAndFlush(packet);

@@ -18,7 +18,6 @@ public class PacketTest {
         byte[] body = "这是测试的数据啊啊啊啊啊啊".getBytes(StandardCharsets.UTF_8);
         ByteBuf buf = encode(body);
         String dump = ByteBufUtil.hexDump(buf);
-        // 5b0000003c000000011001000025370102050000000000e8bf99e698afe6b58be8af95e79a84e695b0e68daee5958ae5958ae5958ae5958ae5958ae5958a44945d
         // 5b0000003c000000011001000025370102050000000000e8bf99e698afe6b58be8af95e79a84e695b0e68daee5958ae5958ae5958ae5958ae5958ae5958ab8535d
         System.out.println(dump);
         System.out.println();

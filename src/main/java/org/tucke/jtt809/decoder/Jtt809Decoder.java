@@ -30,7 +30,7 @@ public class Jtt809Decoder extends MessageToMessageDecoder<ByteBuf> {
         // 判断包头
         if (msg.readByte() != Jtt809Constant.PACKET_HEAD_FLAG) {
             msg.resetReaderIndex();
-            log.debug("消息包头错误: {}5d", ByteBufUtil.hexDump(msg));
+            log.warn("消息包头错误: {}5d", ByteBufUtil.hexDump(msg));
             return;
         }
         byte[] readableBytes = new byte[msg.readableBytes()];

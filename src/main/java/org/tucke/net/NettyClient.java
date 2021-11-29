@@ -1,7 +1,10 @@
 package org.tucke.net;
 
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.*;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import lombok.Data;
@@ -19,7 +22,6 @@ public class NettyClient {
     private final ChannelHandler handler;
 
     private EventLoopGroup group;
-    private Channel channel;
 
     public NettyClient(String host, int port, ChannelHandler handler) {
         this.host = host;
@@ -40,21 +42,9 @@ public class NettyClient {
         ChannelFuture channelFuture = bootstrap.connect();
         channelFuture.addListener(future -> {
             if (future.isSuccess()) {
-                channel = channelFuture.channel();
+                log.info("连接成功");
             }
         });
-    }
-
-    public void write(Object object) {
-        if (channel != null && channel.isActive()) {
-            this.channel.write(object);
-        }
-    }
-
-    public void writeAndFlush(Object object) {
-        if (channel != null && channel.isActive()) {
-            this.channel.writeAndFlush(object);
-        }
     }
 
     public void shutdown() {

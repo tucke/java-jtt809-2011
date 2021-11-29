@@ -27,7 +27,9 @@ public class ConnectProtocol implements Protocol {
             Jtt809Constant.DataType.UP_LINKTEST_REQ,
             Jtt809Constant.DataType.UP_DISCONNECT_INFORM,
             Jtt809Constant.DataType.UP_CLOSELINK_INFORM,
-            Jtt809Constant.DataType.DOWN_CONNECT_RSP
+            Jtt809Constant.DataType.DOWN_CONNECT_RSP,
+            Jtt809Constant.DataType.DOWN_DISCONNECT_RSP,
+            Jtt809Constant.DataType.DOWN_LINKTEST_RSP
     );
 
     @Override
@@ -56,12 +58,19 @@ public class ConnectProtocol implements Protocol {
             case Jtt809Constant.DataType.DOWN_CONNECT_RSP:
                 downConnectRsp(ctx, packet);
                 break;
+            case Jtt809Constant.DataType.DOWN_DISCONNECT_RSP:
+                downDisConnectRsp(ctx, packet);
+                break;
+            case Jtt809Constant.DataType.DOWN_LINKTEST_RSP:
+                downLinkTestRsp(ctx, packet);
+                break;
             default:
         }
     }
 
     /**
      * 处理下级平台登录请求
+     * 链路类型：主链路
      */
     private void login(ChannelHandlerContext ctx, OuterPacket packet) {
         UpConnectPacket.Request request = UpConnectPacket.decode(packet.getBody());
@@ -77,13 +86,14 @@ public class ConnectProtocol implements Protocol {
         if (result == 0x00) {
             Jtt809Client.createClient(packet.getGnsscenterId(), request, new OuterPacket(Jtt809Constant.DataType.DOWN_CONNECT_REQ, body));
         } else {
-            Jtt809Client.removeClient(ctx, packet.getGnsscenterId());
+            Jtt809Client.close(packet.getGnsscenterId());
             ctx.close();
         }
     }
 
     /**
      * 处理下级平台注销请求
+     * 链路类型：主链路
      */
     private void logout(ChannelHandlerContext ctx, OuterPacket packet) {
         UpDisConnectPacket.Request request = UpDisConnectPacket.decode(packet.getBody());
@@ -91,11 +101,13 @@ public class ConnectProtocol implements Protocol {
         // 应答
         OuterPacket out = new OuterPacket(Jtt809Constant.DataType.UP_DISCONNECT_RSP, null);
         ctx.writeAndFlush(out);
+        Jtt809Client.close(packet.getGnsscenterId());
         ctx.close();
     }
 
     /**
      * 保持连接
+     * 链路类型：主链路
      */
     private void keepLink(ChannelHandlerContext ctx, OuterPacket packet) {
         log.info("下级平台 {} 的保持连接消息", packet.getGnsscenterId());
@@ -105,25 +117,30 @@ public class ConnectProtocol implements Protocol {
     }
 
     /**
-     * 从链路下级平台往上级平台发送的中断通知
+     * 下级平台往上级平台发送的中断通知
+     * 链路类型：从链路
      */
     private void disConnectInform(ChannelHandlerContext ctx, OuterPacket packet) {
         byte errorCode = packet.getBody().readByte();
         // 0x00：主链路断开，0x01：其他原因
-        log.warn("下级平台 {} 链路中断，原因是：{}", packet.getGnsscenterId(), errorCode == 0 ? "主链路断开" : "其他原因");
+        // 无需应答
+        log.warn("主链路断开通知消息，通知发送方：{}，原因是：{}", packet.getGnsscenterId(), errorCode == 0 ? "主链路断开" : "其他原因");
     }
 
     /**
      * 下级平台主动关闭主从链路通知消息
+     * 链路类型：从链路
      */
     private void closeLinkInform(ChannelHandlerContext ctx, OuterPacket packet) {
         byte errorCode = packet.getBody().readByte();
         // 0x00：网关重启，0x01：其他原因
+        // 无需应答
         log.warn("下级平台 {} 即将关闭主从链路，原因是：{}", packet.getGnsscenterId(), errorCode == 0 ? "网关重启" : "其他原因");
     }
 
     /**
-     * 从链路连接应答信息
+     * 从链路连接应答消息
+     * 链路类型：从链路
      */
     private void downConnectRsp(ChannelHandlerContext ctx, OuterPacket packet) {
         byte code = packet.getBody().readByte();
@@ -138,6 +155,24 @@ public class ConnectProtocol implements Protocol {
             result = "其他";
         }
         log.info("下级平台 {} 连接结果 {}", packet.getGnsscenterId(), result);
+    }
+
+    /**
+     * 从链路注销应答消息
+     * 链路类型：从链路
+     */
+    private void downDisConnectRsp(ChannelHandlerContext ctx, OuterPacket packet) {
+        // 这是一条空消息
+        log.warn("下级平台 {} 响应了从链路的注销请求消息", packet.getGnsscenterId());
+    }
+
+    /**
+     * 从链路连接保持应答消息
+     * 链路类型：从链路
+     */
+    private void downLinkTestRsp(ChannelHandlerContext ctx, OuterPacket packet) {
+        // 这是一条空消息
+        log.warn("下级平台 {} 响应了从链路的连接保持请求消息", packet.getGnsscenterId());
     }
 
 }

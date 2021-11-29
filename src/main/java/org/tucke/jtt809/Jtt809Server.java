@@ -3,9 +3,13 @@ package org.tucke.jtt809;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelId;
 import io.netty.channel.ChannelInitializer;
+import io.netty.channel.group.ChannelGroup;
+import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.handler.codec.DelimiterBasedFrameDecoder;
 import io.netty.handler.timeout.ReadTimeoutHandler;
+import io.netty.util.concurrent.GlobalEventExecutor;
 import org.tucke.config.AppConfig;
 import org.tucke.jtt809.common.Jtt809Constant;
 import org.tucke.jtt809.decoder.Jtt809Decoder;
@@ -14,12 +18,19 @@ import org.tucke.jtt809.handler.master.Jtt809MasterInboundHandler;
 import org.tucke.jtt809.handler.master.Jtt809MasterOutboundHandler;
 import org.tucke.net.NettyServer;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 /**
  * 主链接
  *
  * @author tucke
  */
+@SuppressWarnings({"SpellCheckingInspection", "DuplicatedCode"})
 public class Jtt809Server {
+
+    private static final ChannelGroup GROUP = new DefaultChannelGroup("Jtt809Server", GlobalEventExecutor.INSTANCE);
+    private static final Map<Integer, ChannelId> ID_MAP = new ConcurrentHashMap<>();
 
     private volatile static Jtt809Server instance;
     private NettyServer nettyServer;
@@ -55,6 +66,38 @@ public class Jtt809Server {
             }
         });
         nettyServer.bind(AppConfig.getIntValue("jtt809.port"));
+    }
+
+    public static void add(Integer gnsscenterId, Channel channel) {
+        ChannelId channelId = channel.id();
+        ID_MAP.put(gnsscenterId, channelId);
+        GROUP.add(channel);
+    }
+
+    public static Channel find(Integer gnsscenterId) {
+        ChannelId channelId = ID_MAP.get(gnsscenterId);
+        if (channelId == null) {
+            return null;
+        }
+        Channel channel = GROUP.find(channelId);
+        if (channel == null) {
+            ID_MAP.remove(gnsscenterId);
+        }
+        return channel;
+    }
+
+    public static void write(Integer gnsscenterId, Object message) {
+        Channel channel = find(gnsscenterId);
+        if (channel != null) {
+            channel.write(message);
+        }
+    }
+
+    public static void writeAndFlush(Integer gnsscenterId, Object message) {
+        Channel channel = find(gnsscenterId);
+        if (channel != null) {
+            channel.writeAndFlush(message);
+        }
     }
 
     public void stop() {
