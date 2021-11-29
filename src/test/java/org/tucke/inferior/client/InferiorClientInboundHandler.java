@@ -19,6 +19,18 @@ public class InferiorClientInboundHandler extends SimpleChannelInboundHandler<Ou
     }
 
     @Override
+    public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
+        System.out.println("channelRegistered");
+        super.channelRegistered(ctx);
+    }
+
+    @Override
+    public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
+        System.out.println("channelUnregistered");
+        super.channelUnregistered(ctx);
+    }
+
+    @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         System.out.println("channelActive");
         ctx.channel().attr(Jtt809Constant.NettyAttribute.GNSS_CENTER_ID).setIfAbsent("95277");
@@ -44,6 +56,12 @@ public class InferiorClientInboundHandler extends SimpleChannelInboundHandler<Ou
     }
 
     @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        System.out.println("channelInactive");
+        super.channelInactive(ctx);
+    }
+
+    @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
         if (evt instanceof IdleStateEvent) {
             IdleStateEvent event = (IdleStateEvent) evt;
@@ -54,6 +72,12 @@ public class InferiorClientInboundHandler extends SimpleChannelInboundHandler<Ou
             }
         }
         super.userEventTriggered(ctx, evt);
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        System.out.println("exceptionCaught");
+        super.exceptionCaught(ctx, cause);
     }
 
 }

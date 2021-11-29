@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.tucke.jtt809.Jtt809Client;
 import org.tucke.jtt809.common.Jtt809Constant;
+import org.tucke.jtt809.packet.UpConnectPacket;
 import org.tucke.jtt809.packet.common.OuterPacket;
 
 /**
@@ -21,6 +22,7 @@ import org.tucke.jtt809.packet.common.OuterPacket;
 public class Jtt809SlaveInboundHandler extends SimpleChannelInboundHandler<OuterPacket> {
 
     private Integer gnsscenterId;
+    private UpConnectPacket.Request request;
     private OuterPacket activePacket;
 
     @Override
@@ -38,15 +40,10 @@ public class Jtt809SlaveInboundHandler extends SimpleChannelInboundHandler<Outer
     }
 
     @Override
-    public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
-        Jtt809Client.close(gnsscenterId);
-        super.channelUnregistered(ctx);
-    }
-
-    @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        Jtt809Client.close(gnsscenterId);
-        super.exceptionCaught(ctx, cause);
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        log.warn("从链路下级平台 {} 断开了, 准备重连。。。", gnsscenterId);
+        Jtt809Client.reconnect(gnsscenterId, request, activePacket);
+        super.channelInactive(ctx);
     }
 
     @Override
@@ -63,4 +60,8 @@ public class Jtt809SlaveInboundHandler extends SimpleChannelInboundHandler<Outer
         super.userEventTriggered(ctx, evt);
     }
 
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        super.exceptionCaught(ctx, cause);
+    }
 }

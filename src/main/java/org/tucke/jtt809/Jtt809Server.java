@@ -68,6 +68,10 @@ public class Jtt809Server {
         nettyServer.bind(AppConfig.getIntValue("jtt809.port"));
     }
 
+    public void stop() {
+        nettyServer.shutdown();
+    }
+
     public static void add(Integer gnsscenterId, Channel channel) {
         ChannelId channelId = channel.id();
         ID_MAP.put(gnsscenterId, channelId);
@@ -98,10 +102,6 @@ public class Jtt809Server {
         if (channel != null) {
             channel.writeAndFlush(message);
         }
-    }
-
-    public void stop() {
-        nettyServer.shutdown();
     }
 
 }

@@ -63,6 +63,8 @@ public class GnssCenterService {
      */
     public byte validateLogin(int gnsscenterId, UpConnectPacket.Request request) {
         // TODO
+        // 首先验证 IP 地址
+        // 其次验证接入码、用户名以及密码
         return (byte) 0x00;
     }
 
