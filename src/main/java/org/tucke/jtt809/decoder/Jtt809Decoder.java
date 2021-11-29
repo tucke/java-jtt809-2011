@@ -23,7 +23,10 @@ public class Jtt809Decoder extends MessageToMessageDecoder<ByteBuf> {
     @SuppressWarnings({"AlibabaUndefineMagicConstant", "SpellCheckingInspection"})
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf msg, List<Object> out) throws Exception {
-        log.debug("收到一条消息：{}5d", ByteBufUtil.hexDump(msg));
+        // 写个判断，线上环境就不需要执行 ByteBufUtil.hexDump
+        if (log.isDebugEnabled()) {
+            log.debug("收到一条消息：{}5d", ByteBufUtil.hexDump(msg));
+        }
         // 判断包头
         if (msg.readByte() != Jtt809Constant.PACKET_HEAD_FLAG) {
             msg.resetReaderIndex();

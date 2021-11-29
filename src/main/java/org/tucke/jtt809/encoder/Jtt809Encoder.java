@@ -17,6 +17,7 @@ import org.tucke.jtt809.packet.common.OuterPacket;
 public class Jtt809Encoder extends MessageToByteEncoder<OuterPacket> {
 
 
+    @SuppressWarnings("SpellCheckingInspection")
     @Override
     protected void encode(ChannelHandlerContext ctx, OuterPacket packet, ByteBuf out) throws Exception {
         if (packet == null) {
