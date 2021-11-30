@@ -57,7 +57,7 @@ public class Jtt809Decoder extends MessageToMessageDecoder<ByteBuf> {
         int id = byteBuf.readUnsignedShort();
         // 下级平台接入码
         int gnsscenterId = byteBuf.readInt();
-        ctx.channel().attr(Jtt809Constant.NettyAttribute.GNSS_CENTER_ID).set(String.valueOf(gnsscenterId));
+        ctx.channel().attr(Jtt809Constant.NettyAttribute.GNSS_CENTER_ID).setIfAbsent(String.valueOf(gnsscenterId));
         // 协议版本号标识
         String version = "v" + byteBuf.readByte() + "." + byteBuf.readByte() + "." + byteBuf.readByte();
         // 报文加密标识位

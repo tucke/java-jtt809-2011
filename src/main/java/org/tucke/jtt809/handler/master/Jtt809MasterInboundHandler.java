@@ -3,7 +3,6 @@ package org.tucke.jtt809.handler.master;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import lombok.extern.slf4j.Slf4j;
-import org.tucke.jtt809.common.Jtt809Constant;
 import org.tucke.jtt809.handler.ProtocolHandler;
 import org.tucke.jtt809.handler.protocol.connect.ConnectProtocol;
 import org.tucke.jtt809.packet.common.OuterPacket;
