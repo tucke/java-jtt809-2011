@@ -15,7 +15,7 @@ public class InferiorClientInboundHandler extends SimpleChannelInboundHandler<Ou
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, OuterPacket msg) throws Exception {
-
+        System.out.println(msg.toString());
     }
 
     @Override

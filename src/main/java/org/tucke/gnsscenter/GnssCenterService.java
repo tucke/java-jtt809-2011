@@ -18,6 +18,7 @@ public class GnssCenterService {
 
     private final Lock lock = new ReentrantLock();
     private final Map<Integer, AtomicInteger> SERIAL_NUMBER_MAP = new ConcurrentHashMap<>();
+    private final Map<Integer, UpConnectPacket.Request> DOWN_REQUEST = new ConcurrentHashMap<>();
     private volatile static GnssCenterService instance;
 
     private GnssCenterService() {
@@ -65,7 +66,15 @@ public class GnssCenterService {
         // TODO
         // 首先验证 IP 地址
         // 其次验证接入码、用户名以及密码
-        return (byte) 0x00;
+        byte result = 0x00;
+        if (result == 0x00) {
+            DOWN_REQUEST.put(gnsscenterId, request);
+        }
+        return result;
+    }
+
+    public UpConnectPacket.Request getDownRequest(int gnsscenterId) {
+        return DOWN_REQUEST.get(gnsscenterId);
     }
 
     /**

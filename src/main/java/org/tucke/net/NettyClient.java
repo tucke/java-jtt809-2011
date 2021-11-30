@@ -10,6 +10,9 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+
 /**
  * @author tucke
  */
@@ -17,15 +20,21 @@ import lombok.extern.slf4j.Slf4j;
 @Data
 public class NettyClient {
 
-    private final String host;
-    private final int port;
+    private final String name;
+    private final SocketAddress address;
     private final ChannelHandler handler;
 
     private EventLoopGroup group;
 
-    public NettyClient(String host, int port, ChannelHandler handler) {
-        this.host = host;
-        this.port = port;
+    public NettyClient(String name, SocketAddress address, ChannelHandler handler) {
+        this.name = name;
+        this.address = address;
+        this.handler = handler;
+    }
+
+    public NettyClient(String name, String host, int port, ChannelHandler handler) {
+        this.name = name;
+        this.address = new InetSocketAddress(host, port);
         this.handler = handler;
     }
 
@@ -35,14 +44,14 @@ public class NettyClient {
         Bootstrap bootstrap = new Bootstrap();
         bootstrap.group(group)
                 .channel(NioSocketChannel.class)
-                .remoteAddress(host, port)
+                .remoteAddress(address)
                 .option(ChannelOption.TCP_NODELAY, true)
                 .option(ChannelOption.SO_KEEPALIVE, true)
                 .handler(handler);
         ChannelFuture channelFuture = bootstrap.connect();
         channelFuture.addListener(future -> {
             if (future.isSuccess()) {
-                log.info("连接成功");
+                log.info("{}连接成功，远端地址为：{}", name, address.toString());
             }
         });
     }

@@ -5,12 +5,14 @@ import io.netty.channel.ChannelHandlerContext;
 import lombok.extern.slf4j.Slf4j;
 import org.tucke.gnsscenter.GnssCenterService;
 import org.tucke.jtt809.Jtt809Client;
+import org.tucke.jtt809.Jtt809Server;
 import org.tucke.jtt809.common.Jtt809Constant;
 import org.tucke.jtt809.handler.protocol.Protocol;
 import org.tucke.jtt809.packet.UpConnectPacket;
 import org.tucke.jtt809.packet.UpDisConnectPacket;
 import org.tucke.jtt809.packet.common.OuterPacket;
 
+import java.net.InetSocketAddress;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -84,7 +86,9 @@ public class ConnectProtocol implements Protocol {
         ctx.writeAndFlush(out);
         // 接入成功就建立从链接，否则关闭链接
         if (result == 0x00) {
-            Jtt809Client.createClient(packet.getGnsscenterId(), request, new OuterPacket(Jtt809Constant.DataType.DOWN_CONNECT_REQ, body));
+            Jtt809Server.add(packet.getGnsscenterId(), ctx.channel());
+            InetSocketAddress address = new InetSocketAddress(request.getDownLinkIp(), request.getDownLinkPort());
+            Jtt809Client.createClient(packet.getGnsscenterId(), address, new OuterPacket(Jtt809Constant.DataType.DOWN_CONNECT_REQ, body));
         } else {
             Jtt809Client.close(packet.getGnsscenterId());
             ctx.close();

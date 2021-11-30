@@ -18,7 +18,7 @@ public class InferiorClientTest {
     public static void main(String[] args) throws Exception {
         ByteBuf packetEndFlag = Unpooled.wrappedBuffer(new byte[]{Jtt809Constant.PACKET_END_FLAG});
 
-        NettyClient client = new NettyClient("localhost", 5200, new ChannelInitializer<>() {
+        NettyClient client = new NettyClient("InferiorClientTest", "localhost", 5200, new ChannelInitializer<>() {
             @Override
             protected void initChannel(Channel ch) throws Exception {
                 ch.pipeline().addLast(new IdleStateHandler(0, 55, 0, TimeUnit.SECONDS));

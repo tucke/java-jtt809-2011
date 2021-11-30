@@ -1,6 +1,7 @@
 package org.tucke.jtt809.handler.slave;
 
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.EventLoop;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
@@ -9,8 +10,9 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.tucke.jtt809.Jtt809Client;
 import org.tucke.jtt809.common.Jtt809Constant;
-import org.tucke.jtt809.packet.UpConnectPacket;
 import org.tucke.jtt809.packet.common.OuterPacket;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author tucke
@@ -22,7 +24,6 @@ import org.tucke.jtt809.packet.common.OuterPacket;
 public class Jtt809SlaveInboundHandler extends SimpleChannelInboundHandler<OuterPacket> {
 
     private Integer gnsscenterId;
-    private UpConnectPacket.Request request;
     private OuterPacket activePacket;
 
     @Override
@@ -31,7 +32,18 @@ public class Jtt809SlaveInboundHandler extends SimpleChannelInboundHandler<Outer
     }
 
     @Override
+    public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
+        super.channelRegistered(ctx);
+    }
+
+    @Override
+    public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
+        super.channelUnregistered(ctx);
+    }
+
+    @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        log.debug("从链路下级平台 {} 通道激活", gnsscenterId);
         Jtt809Client.add(gnsscenterId, ctx.channel());
         if (activePacket != null) {
             ctx.writeAndFlush(activePacket);
@@ -41,8 +53,10 @@ public class Jtt809SlaveInboundHandler extends SimpleChannelInboundHandler<Outer
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        log.warn("从链路下级平台 {} 断开了, 准备重连。。。", gnsscenterId);
-        Jtt809Client.reconnect(gnsscenterId, request, activePacket);
+        log.warn("从链路下级平台 {} 通道断开, 准备重连。。。", gnsscenterId);
+        EventLoop eventLoop = ctx.channel().eventLoop();
+        // 每 5 秒进行一次重连
+        eventLoop.scheduleWithFixedDelay(() -> Jtt809Client.reconnect(gnsscenterId, activePacket), 5, 5, TimeUnit.SECONDS);
         super.channelInactive(ctx);
     }
 
@@ -62,6 +76,7 @@ public class Jtt809SlaveInboundHandler extends SimpleChannelInboundHandler<Outer
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        log.error("从链路下级平台 {} 异常：{}", gnsscenterId, cause);
         super.exceptionCaught(ctx, cause);
     }
 }
