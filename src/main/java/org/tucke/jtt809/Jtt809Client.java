@@ -58,7 +58,7 @@ public class Jtt809Client {
             client.connect();
         } catch (Exception e) {
             downDisconnectInform(gnsscenterId, (byte) 0x00);
-            log.error("连接下级平台 {} 失败：{}", gnsscenterId, e.getLocalizedMessage());
+            log.error("连接下级平台 {} 失败：{}", gnsscenterId, e);
         }
     }
 
