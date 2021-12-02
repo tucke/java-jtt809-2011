@@ -29,7 +29,7 @@ public class AppConfig {
             }
         }
         Yaml yaml = new Yaml();
-        InputStream inputStream = AppConfig.class.getClassLoader().getResourceAsStream(fileName.append(".yaml").toString());
+        InputStream inputStream = AppConfig.class.getClassLoader().getResourceAsStream(fileName.append(".yml").toString());
         APPLICATION_CONFIG = yaml.load(inputStream);
     }
 
