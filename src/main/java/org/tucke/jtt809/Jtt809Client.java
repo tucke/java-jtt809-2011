@@ -16,7 +16,7 @@ import org.tucke.jtt809.common.Jtt809Constant;
 import org.tucke.jtt809.decoder.Jtt809Decoder;
 import org.tucke.jtt809.encoder.Jtt809Encoder;
 import org.tucke.jtt809.handler.slave.Jtt809SlaveInboundHandler;
-import org.tucke.jtt809.packet.UpConnectPacket;
+import org.tucke.jtt809.packet.connect.UpConnectPacket;
 import org.tucke.jtt809.packet.common.OuterPacket;
 import org.tucke.net.NettyClient;
 

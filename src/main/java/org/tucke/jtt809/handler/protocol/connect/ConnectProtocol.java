@@ -8,8 +8,8 @@ import org.tucke.jtt809.Jtt809Client;
 import org.tucke.jtt809.Jtt809Server;
 import org.tucke.jtt809.common.Jtt809Constant;
 import org.tucke.jtt809.handler.protocol.Protocol;
-import org.tucke.jtt809.packet.UpConnectPacket;
-import org.tucke.jtt809.packet.UpDisConnectPacket;
+import org.tucke.jtt809.packet.connect.UpConnectPacket;
+import org.tucke.jtt809.packet.connect.UpDisConnectPacket;
 import org.tucke.jtt809.packet.common.OuterPacket;
 
 import java.net.InetSocketAddress;

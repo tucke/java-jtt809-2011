@@ -1,6 +1,6 @@
 package org.tucke.gnsscenter;
 
-import org.tucke.jtt809.packet.UpConnectPacket;
+import org.tucke.jtt809.packet.connect.UpConnectPacket;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

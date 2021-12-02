@@ -1,4 +1,4 @@
-package org.tucke.jtt809.packet;
+package org.tucke.jtt809.packet.connect;
 
 import io.netty.buffer.ByteBuf;
 import lombok.AllArgsConstructor;

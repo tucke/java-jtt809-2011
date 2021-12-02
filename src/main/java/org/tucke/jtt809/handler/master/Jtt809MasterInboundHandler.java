@@ -5,6 +5,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.tucke.jtt809.handler.ProtocolHandler;
 import org.tucke.jtt809.handler.protocol.connect.ConnectProtocol;
+import org.tucke.jtt809.handler.protocol.exg.VehicleExgProtocol;
 import org.tucke.jtt809.packet.common.OuterPacket;
 
 /**
@@ -19,6 +20,7 @@ public class Jtt809MasterInboundHandler extends SimpleChannelInboundHandler<Oute
         super(true);
         protocolHandler = new ProtocolHandler();
         protocolHandler.addProtocol(new ConnectProtocol());
+        protocolHandler.addProtocol(new VehicleExgProtocol());
     }
 
     @Override
