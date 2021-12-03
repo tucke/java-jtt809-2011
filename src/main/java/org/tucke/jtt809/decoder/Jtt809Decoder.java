@@ -49,6 +49,7 @@ public class Jtt809Decoder extends MessageToMessageDecoder<ByteBuf> {
         // 长度校验, 反转义之后数组加上包头和包尾长度与解析出来的长度对比；
         // 因为数据长度不包含校验码，而此时解析出来的数据不包含头尾标识，刚好都是2个字节，所以两个长度应该相等
         if (length != bytes.length) {
+            log.warn("消息长度校验错误，报文解析出来长度为 {}, 实际可解析的长度为 {}", length, bytes.length);
             return;
         }
         // 报文序列号
