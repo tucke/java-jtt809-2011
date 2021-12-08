@@ -1,10 +1,10 @@
 package org.tucke.jtt809.encoder;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
-import io.netty.util.ReferenceCountUtil;
 import org.tucke.gnsscenter.GnssCenterService;
 import org.tucke.jtt809.common.CRC16CCITT;
 import org.tucke.jtt809.common.Jtt809Constant;
@@ -53,7 +53,7 @@ public class Jtt809Encoder extends MessageToByteEncoder<OuterPacket> {
         // 数据加密的密钥
         out.writeInt(0);
         // 数据体
-        out.writeBytes(body);
+        out.writeBytes(ByteBufUtil.getBytes(body));
         // 校验码
         byte[] crcBytes = new byte[out.readableBytes()];
         out.readBytes(crcBytes);
@@ -72,7 +72,6 @@ public class Jtt809Encoder extends MessageToByteEncoder<OuterPacket> {
         out.writeBytes(Jtt809Util.escape(escapeBytes));
         // 包尾标识
         out.writeByte(Jtt809Constant.PACKET_END_FLAG);
-        ReferenceCountUtil.release(body);
     }
 
 }

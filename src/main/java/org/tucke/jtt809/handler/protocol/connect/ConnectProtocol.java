@@ -8,9 +8,9 @@ import org.tucke.jtt809.Jtt809Client;
 import org.tucke.jtt809.Jtt809Server;
 import org.tucke.jtt809.common.Jtt809Constant;
 import org.tucke.jtt809.handler.protocol.Protocol;
+import org.tucke.jtt809.packet.common.OuterPacket;
 import org.tucke.jtt809.packet.connect.UpConnectPacket;
 import org.tucke.jtt809.packet.connect.UpDisConnectPacket;
-import org.tucke.jtt809.packet.common.OuterPacket;
 
 import java.net.InetSocketAddress;
 import java.util.Set;
@@ -150,7 +150,8 @@ public class ConnectProtocol implements Protocol {
         byte code = packet.getBody().readByte();
         String result = "未知";
         if (code == 0x00) {
-            result = "成功";
+            Jtt809Client.add(packet.getGnsscenterId(), ctx.channel());
+            return;
         } else if (code == 0x01) {
             result = "校验码错误";
         } else if (code == 0x02) {
@@ -158,7 +159,7 @@ public class ConnectProtocol implements Protocol {
         } else if (code == 0x03) {
             result = "其他";
         }
-        log.info("下级平台 {} 连接结果 {}", packet.getGnsscenterId(), result);
+        log.info("下级平台 {} 连接结果：{}", packet.getGnsscenterId(), result);
     }
 
     /**

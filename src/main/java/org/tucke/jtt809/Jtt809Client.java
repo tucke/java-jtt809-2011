@@ -16,8 +16,9 @@ import org.tucke.jtt809.common.Jtt809Constant;
 import org.tucke.jtt809.decoder.Jtt809Decoder;
 import org.tucke.jtt809.encoder.Jtt809Encoder;
 import org.tucke.jtt809.handler.slave.Jtt809SlaveInboundHandler;
-import org.tucke.jtt809.packet.connect.UpConnectPacket;
+import org.tucke.jtt809.handler.slave.Jtt809SlaveOutBoundHandler;
 import org.tucke.jtt809.packet.common.OuterPacket;
+import org.tucke.jtt809.packet.connect.UpConnectPacket;
 import org.tucke.net.NettyClient;
 
 import java.net.InetSocketAddress;
@@ -26,6 +27,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * 从链接
@@ -36,6 +39,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Slf4j
 public class Jtt809Client {
 
+    private static final Lock LOCK = new ReentrantLock();
     private static final ChannelGroup GROUP = new DefaultChannelGroup("Jtt809Client", GlobalEventExecutor.INSTANCE);
     private static final Map<Integer, ChannelId> ID_MAP = new ConcurrentHashMap<>();
     private static final Map<Integer, AtomicInteger> RETRY_COUNT = new ConcurrentHashMap<>();
@@ -48,6 +52,7 @@ public class Jtt809Client {
             protected void initChannel(Channel ch) throws Exception {
                 // 每分钟（这里设置为 55 秒）进行心跳检查
                 ch.pipeline().addLast(new IdleStateHandler(0, 55, 0, TimeUnit.SECONDS));
+                ch.pipeline().addLast(new Jtt809SlaveOutBoundHandler());
                 ch.pipeline().addLast(new Jtt809Encoder());
                 ch.pipeline().addLast(new DelimiterBasedFrameDecoder(2048, packetEndFlag));
                 ch.pipeline().addLast(new Jtt809Decoder());
@@ -78,13 +83,18 @@ public class Jtt809Client {
     @SuppressWarnings("AlibabaUndefineMagicConstant")
     public static void reconnect(Integer gnsscenterId, OuterPacket activePacket) {
         int retry = 0;
-        if (RETRY_COUNT.containsKey(gnsscenterId)) {
-            retry = RETRY_COUNT.get(gnsscenterId).getAndIncrement();
-        } else {
-            RETRY_COUNT.put(gnsscenterId, new AtomicInteger());
+        LOCK.lock();
+        try {
+            if (RETRY_COUNT.containsKey(gnsscenterId)) {
+                retry = RETRY_COUNT.get(gnsscenterId).incrementAndGet();
+            } else {
+                RETRY_COUNT.put(gnsscenterId, new AtomicInteger());
+            }
+        } finally {
+            LOCK.unlock();
         }
         if (retry < 3) {
-            log.debug("第 {} 次尝试重连下级平台 {} 服务器。。。", retry + 1, gnsscenterId);
+            log.warn("第 {} 次尝试重连下级平台 {} 服务器。。。", retry + 1, gnsscenterId);
             UpConnectPacket.Request request = GnssCenterService.getInstance().getDownRequest(gnsscenterId);
             if (request == null) {
                 log.warn("无法重连");
@@ -92,7 +102,7 @@ public class Jtt809Client {
             }
             newClient(gnsscenterId, request.getDownLinkIp(), request.getDownLinkPort(), activePacket);
         } else {
-            log.debug("从链路下级平台 {} 服务器超过重连次数，不再进行重连，并且通过主链路通知下级平台", gnsscenterId);
+            log.warn("从链路下级平台 {} 服务器超过重连次数，不再进行重连，并且通过主链路通知下级平台", gnsscenterId);
             downDisconnectInform(gnsscenterId, (byte) 0x01);
             RETRY_COUNT.remove(gnsscenterId);
             close(gnsscenterId);
@@ -117,11 +127,7 @@ public class Jtt809Client {
     }
 
     public static void resetRetryCount(Integer gnsscenterId) {
-        if (RETRY_COUNT.containsKey(gnsscenterId)) {
-            RETRY_COUNT.get(gnsscenterId).set(0);
-        } else {
-            RETRY_COUNT.put(gnsscenterId, new AtomicInteger());
-        }
+        RETRY_COUNT.remove(gnsscenterId);
     }
 
     @SuppressWarnings("DuplicatedCode")

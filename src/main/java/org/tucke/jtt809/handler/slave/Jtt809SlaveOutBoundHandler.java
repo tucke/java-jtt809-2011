@@ -1,4 +1,4 @@
-package org.tucke.jtt809.handler.master;
+package org.tucke.jtt809.handler.slave;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
@@ -11,12 +11,12 @@ import lombok.extern.slf4j.Slf4j;
  * @author tucke
  */
 @Slf4j
-public class Jtt809MasterOutboundHandler extends ChannelOutboundHandlerAdapter {
+public class Jtt809SlaveOutBoundHandler extends ChannelOutboundHandlerAdapter {
 
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
         if (log.isDebugEnabled()) {
-            log.debug("主链路发送的消息：{}", ByteBufUtil.hexDump((ByteBuf) msg));
+            log.debug("从链路发送的消息：{}", ByteBufUtil.hexDump((ByteBuf) msg));
         }
         super.write(ctx, msg, promise);
     }

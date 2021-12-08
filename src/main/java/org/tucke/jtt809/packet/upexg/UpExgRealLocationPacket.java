@@ -3,6 +3,7 @@ package org.tucke.jtt809.packet.upexg;
 import io.netty.buffer.ByteBuf;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateUtils;
 
@@ -14,6 +15,7 @@ import java.text.ParseException;
  * @author tucke
  */
 @Slf4j
+@ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class UpExgRealLocationPacket extends UpExgPacket {

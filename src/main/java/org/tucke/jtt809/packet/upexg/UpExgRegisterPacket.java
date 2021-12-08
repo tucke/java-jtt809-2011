@@ -3,11 +3,13 @@ package org.tucke.jtt809.packet.upexg;
 import io.netty.buffer.ByteBuf;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.tucke.jtt809.common.Jtt809Util;
 
 /**
  * @author tucke
  */
+@ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class UpExgRegisterPacket extends UpExgPacket {
