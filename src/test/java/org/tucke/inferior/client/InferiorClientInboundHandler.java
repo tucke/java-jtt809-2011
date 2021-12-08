@@ -1,6 +1,7 @@
 package org.tucke.inferior.client;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -49,7 +50,8 @@ public class InferiorClientInboundHandler extends SimpleChannelInboundHandler<Ou
 
         OuterPacket packet = new OuterPacket();
         packet.setId(Jtt809Constant.DataType.UP_CONNECT_REQ);
-        packet.setBody(byteBuf);
+        packet.setBody(ByteBufUtil.getBytes(byteBuf));
+        byteBuf.release();
 
         ctx.writeAndFlush(packet);
         super.channelActive(ctx);

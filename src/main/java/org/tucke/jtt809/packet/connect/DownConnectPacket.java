@@ -1,6 +1,7 @@
 package org.tucke.jtt809.packet.connect;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 
 /**
@@ -8,10 +9,12 @@ import io.netty.buffer.Unpooled;
  */
 public class DownConnectPacket {
 
-    public static ByteBuf encode(int verifyCode) {
+    public static byte[] encode(int verifyCode) {
         ByteBuf byteBuf = Unpooled.buffer(4);
         byteBuf.writeInt(verifyCode);
-        return byteBuf;
+        byte[] bytes = ByteBufUtil.getBytes(byteBuf);
+        byteBuf.release();
+        return bytes;
     }
 
 }

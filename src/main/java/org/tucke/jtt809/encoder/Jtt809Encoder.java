@@ -1,8 +1,6 @@
 package org.tucke.jtt809.encoder;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufUtil;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
 import org.tucke.gnsscenter.GnssCenterService;
@@ -29,12 +27,12 @@ public class Jtt809Encoder extends MessageToByteEncoder<OuterPacket> {
         } else {
             gnsscenterId = packet.getGnsscenterId();
         }
-        ByteBuf body = packet.getBody();
+        byte[] body = packet.getBody();
         if (body == null) {
-            body = Unpooled.buffer();
+            body = new byte[0];
         }
         // 24 = 头标识[1] + 数据头[22 = 长度[4] + 序列号[4] + 数据类型[2] + 接入码[4] + 版本号[3] + 加密标识[1] + 密钥[4]] + 尾标识[1]
-        int len = body.readableBytes() + 24;
+        int len = body.length + 24;
         out.markReaderIndex();
         // 数据长度
         out.writeInt(len);
@@ -53,7 +51,7 @@ public class Jtt809Encoder extends MessageToByteEncoder<OuterPacket> {
         // 数据加密的密钥
         out.writeInt(0);
         // 数据体
-        out.writeBytes(ByteBufUtil.getBytes(body));
+        out.writeBytes(body);
         // 校验码
         byte[] crcBytes = new byte[out.readableBytes()];
         out.readBytes(crcBytes);

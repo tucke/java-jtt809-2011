@@ -121,7 +121,7 @@ public class Jtt809Client {
     private static void downDisconnectInform(Integer gnsscenterId, byte reason) {
         Channel masterChannel = Jtt809Server.find(gnsscenterId);
         if (masterChannel != null) {
-            OuterPacket out = new OuterPacket(Jtt809Constant.DataType.DOWN_DISCONNECT_INFORM, Unpooled.wrappedBuffer(new byte[]{reason}));
+            OuterPacket out = new OuterPacket(Jtt809Constant.DataType.DOWN_DISCONNECT_INFORM, new byte[]{reason});
             masterChannel.writeAndFlush(out);
         }
     }

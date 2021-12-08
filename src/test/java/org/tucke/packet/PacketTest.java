@@ -109,16 +109,17 @@ public class PacketTest {
         // 数据加密解密的密匙
         long encryptKey = byteBuf.readUnsignedInt();
         // 消息体
-        ByteBuf body;
+        byte[] body;
         if (encryptFlag == 1) {
             byte[] encryptedBytes = new byte[byteBuf.readableBytes() - 2];
             byteBuf.readBytes(encryptedBytes);
             // 解密
             int[] param = GnssCenterService.getInstance().getDecryptParam(gnsscenterId);
             Jtt809Util.decrypt(param[0], param[1], param[2], encryptKey, encryptedBytes);
-            body = Unpooled.wrappedBuffer(encryptedBytes);
+            body = encryptedBytes;
         } else {
-            body = byteBuf.readBytes(byteBuf.readableBytes() - 2);
+            body = new byte[byteBuf.readableBytes() - 2];
+            byteBuf.readBytes(body);
         }
         // 校验码
         int crcCode = byteBuf.readUnsignedShort();

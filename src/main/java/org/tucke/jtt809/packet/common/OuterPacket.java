@@ -1,6 +1,5 @@
 package org.tucke.jtt809.packet.common;
 
-import io.netty.buffer.ByteBuf;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -54,18 +53,18 @@ public class OuterPacket implements Serializable {
     /**
      * 消息体
      */
-    private ByteBuf body;
+    private byte[] body;
     /**
      * 数据 CRC 校验码
      */
     private int crcCode;
 
-    public OuterPacket(int id, ByteBuf body) {
+    public OuterPacket(int id, byte[] body) {
         this.id = id;
         this.body = body;
     }
 
-    public OuterPacket(int id, int gnsscenterId, ByteBuf body) {
+    public OuterPacket(int id, int gnsscenterId, byte[] body) {
         this.id = id;
         this.gnsscenterId = gnsscenterId;
         this.body = body;

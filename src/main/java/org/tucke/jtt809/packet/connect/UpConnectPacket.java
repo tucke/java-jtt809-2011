@@ -1,6 +1,7 @@
 package org.tucke.jtt809.packet.connect;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -70,11 +71,13 @@ public class UpConnectPacket {
     /**
      * 编码登录回复报文
      */
-    public static ByteBuf encode(Response response) {
+    public static byte[] encode(Response response) {
         ByteBuf byteBuf = Unpooled.buffer(5);
         byteBuf.writeByte(response.getResult());
         byteBuf.writeInt(response.getVerifyCode());
-        return byteBuf;
+        byte[] bytes = ByteBufUtil.getBytes(byteBuf);
+        byteBuf.release();
+        return bytes;
     }
 
 }
