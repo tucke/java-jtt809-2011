@@ -40,6 +40,7 @@ public class Jtt809Decoder extends MessageToMessageDecoder<ByteBuf> {
         ByteBuf byteBuf = Unpooled.wrappedBuffer(bytes);
         // crc校验
         if (!Jtt809Util.validate(byteBuf)) {
+            ReferenceCountUtil.release(byteBuf);
             return;
         }
 
@@ -50,6 +51,7 @@ public class Jtt809Decoder extends MessageToMessageDecoder<ByteBuf> {
         // 因为数据长度不包含校验码，而此时解析出来的数据不包含头尾标识，刚好都是2个字节，所以两个长度应该相等
         if (length != bytes.length) {
             log.warn("消息长度校验错误，报文解析出来长度为 {}, 实际可解析的长度为 {}", length, bytes.length);
+            ReferenceCountUtil.release(byteBuf);
             return;
         }
         // 报文序列号
