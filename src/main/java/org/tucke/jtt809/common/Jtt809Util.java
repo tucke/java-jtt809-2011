@@ -2,9 +2,13 @@ package org.tucke.jtt809.common;
 
 import io.netty.buffer.ByteBuf;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.time.DateUtils;
+import org.apache.commons.lang3.time.FastDateFormat;
 
 import java.nio.charset.Charset;
+import java.text.ParseException;
 import java.util.Arrays;
+import java.util.TimeZone;
 
 /**
  * @author tucke
@@ -173,6 +177,22 @@ public class Jtt809Util {
      */
     public static String readGBKString(ByteBuf byteBuf, int length) {
         return readGBKString(byteBuf, length, true);
+    }
+
+    /**
+     * 解析时间
+     */
+    public static long parseDateTime(ByteBuf byteBuf) {
+        String date = byteBuf.readByte() + "-" + byteBuf.readByte() + "-" + byteBuf.readShort() + " " +
+                byteBuf.readByte() + ":" + byteBuf.readByte() + ":" + byteBuf.readByte();
+        long time = 0L;
+        try {
+            FastDateFormat format = FastDateFormat.getInstance("dd-MM-yyyy HH:mm:ss", TimeZone.getTimeZone("GMT+8:00"));
+            time = format.parse(date).getTime();
+        } catch (ParseException e) {
+            log.warn("日期 [{}] 解析错误", date);
+        }
+        return time;
     }
 
 }

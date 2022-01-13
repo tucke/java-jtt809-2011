@@ -6,6 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateUtils;
+import org.tucke.jtt809.common.Jtt809Util;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -37,14 +38,8 @@ public class UpExgRealLocationPacket extends UpExgPacket {
     public static UpExgRealLocationPacket decode(ByteBuf byteBuf) {
         UpExgRealLocationPacket packet = new UpExgRealLocationPacket();
         packet.setEncrypt(byteBuf.readByte());
-        String date = byteBuf.readByte() + "-" + byteBuf.readByte() + "-" + byteBuf.readShort() + " " +
-                byteBuf.readByte() + ":" + byteBuf.readByte() + ":" + byteBuf.readByte();
-        try {
-            long time = DateUtils.parseDate(date, "dd-MM-yyyy HH:mm:ss").getTime();
-            packet.setTimestamp(time);
-        } catch (ParseException e) {
-            log.warn("日期 [{}] 解析错误", date);
-        }
+        long time = Jtt809Util.parseDateTime(byteBuf);
+        packet.setTimestamp(time);
         BigDecimal lon = new BigDecimal(String.valueOf(byteBuf.readInt()));
         BigDecimal lat = new BigDecimal(String.valueOf(byteBuf.readInt()));
         try {
