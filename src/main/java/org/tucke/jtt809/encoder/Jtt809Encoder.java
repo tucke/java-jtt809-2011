@@ -3,11 +3,13 @@ package org.tucke.jtt809.encoder;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
-import org.tucke.gnsscenter.GnssCenterService;
+import io.netty.util.Attribute;
 import org.tucke.jtt809.common.CRC16CCITT;
 import org.tucke.jtt809.common.Jtt809Constant;
 import org.tucke.jtt809.common.Jtt809Util;
 import org.tucke.jtt809.packet.common.OuterPacket;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author tucke
@@ -37,7 +39,7 @@ public class Jtt809Encoder extends MessageToByteEncoder<OuterPacket> {
         // 数据长度
         out.writeInt(len);
         // 序列号
-        out.writeInt(GnssCenterService.getInstance().serialNo(gnsscenterId));
+        out.writeInt(ackSerialNo(ctx));
         // 业务数据类型
         out.writeShort(packet.getId());
         // 下级平台接入码
@@ -70,6 +72,20 @@ public class Jtt809Encoder extends MessageToByteEncoder<OuterPacket> {
         out.writeBytes(Jtt809Util.escape(escapeBytes));
         // 包尾标识
         out.writeByte(Jtt809Constant.PACKET_END_FLAG);
+    }
+
+    private int ackSerialNo(ChannelHandlerContext ctx) {
+        Attribute<AtomicInteger> serialNoAttribute = ctx.channel().attr(Jtt809Constant.NettyAttribute.PLATFORM_ACK_SERIAL_NO);
+        AtomicInteger serialNo = serialNoAttribute.get();
+        if (serialNo == null) {
+            serialNo = new AtomicInteger();
+            serialNoAttribute.set(serialNo);
+        }
+        int result = serialNo.getAndIncrement();
+        if (result >= Integer.MAX_VALUE) {
+            serialNo.set(0);
+        }
+        return result;
     }
 
 }

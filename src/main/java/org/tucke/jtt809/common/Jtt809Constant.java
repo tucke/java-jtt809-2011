@@ -2,6 +2,8 @@ package org.tucke.jtt809.common;
 
 import io.netty.util.AttributeKey;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
  * @author tucke
  */
@@ -14,6 +16,7 @@ public class Jtt809Constant {
 
     public static final class NettyAttribute {
         public static final AttributeKey<String> GNSS_CENTER_ID = AttributeKey.valueOf("GNSS_CENTER_ID");
+        public static final AttributeKey<AtomicInteger> PLATFORM_ACK_SERIAL_NO = AttributeKey.valueOf("PLATFORM_ACK_SERIAL_NO");
     }
 
     /**
